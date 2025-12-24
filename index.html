@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthwave Pomodoro Timer</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #0f0f1a;
+            color: #00fffc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Neon Grid Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(15, 15, 26, 0.9) 20px, transparent 1%) center,
+                linear-gradient(rgba(15, 15, 26, 0.9) 20px, transparent 1%) center,
+                #ff00ff;
+            background-size: 22px 22px;
+            z-index: -1;
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(15, 15, 26, 0.7);
+            border: 2px solid #00fffc;
+            box-shadow: 0 0 20px #00fffc, 0 0 40px #ff00ff;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Title */
+        h1 {
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 5px #00fffc;
+            font-size: 2.5rem;
+        }
+
+        /* Timer Display */
+        .timer-display {
+            font-size: 6rem;
+            margin: 30px 0;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00fffc;
+            position: relative;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 4px;
+            text-shadow: -4px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -4px;
+            text-shadow: -4px 0 #00fffc, 4px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            10% { clip: rect(112px, 9999px, 76px, 0); }
+            20% { clip: rect(85px, 9999px, 77px, 0); }
+            30% { clip: rect(27px, 9999px, 97px, 0); }
+            40% { clip: rect(64px, 9999px, 98px, 0); }
+            50% { clip: rect(61px, 9999px, 85px, 0); }
+            60% { clip: rect(99px, 9999px, 114px, 0); }
+            70% { clip: rect(34px, 9999px, 115px, 0); }
+            80% { clip: rect(98px, 9999px, 129px, 0); }
+            90% { clip: rect(43px, 9999px, 96px, 0); }
+            100% { clip: rect(82px, 9999px, 64px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 119px, 0); }
+            10% { clip: rect(120px, 9999px, 55px, 0); }
+            20% { clip: rect(100px, 9999px, 57px, 0); }
+            30% { clip: rect(90px, 9999px, 30px, 0); }
+            40% { clip: rect(88px, 9999px, 70px, 0); }
+            50% { clip: rect(62px, 9999px, 5px, 0); }
+            60% { clip: rect(10px, 9999px, 2px, 0); }
+            70% { clip: rect(80px, 9999px, 103px, 0); }
+            80% { clip: rect(10px, 9999px, 130px, 0); }
+            90% { clip: rect(65px, 9999px, 36px, 0); }
+            100% { clip: rect(98px, 9999px, 78px, 0); }
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        button {
+            background: none;
+            border: 2px solid #00fffc;
+            color: #00fffc;
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px #00fffc;
+        }
+
+        button:hover {
+            background: #00fffc;
+            color: #0f0f1a;
+            box-shadow: 0 0 20px #00fffc, 0 0 40px #ff00ff;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 252, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        /* Change indicators */
+        .change-indicator {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .focus {
+            color: #00fffc;
+            text-shadow: 0 0 5px #00fffc;
+        }
+
+        .break {
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(15, 15, 26, 0.1) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+            opacity: 0.4;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Noise effect */
+        .noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOww4DDsMIAwAAABVJREFUaEPt2cEJACAMQ9FG/9CD7CRCK7Q+KJGQPATMWxs0DWTq4QgZE4AQgAaQaYxrCAgICHgA4MpH0jw3e1IAAAAASUVORK5CYII=');
+            opacity: 0.03;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+    
+    <div class="container">
+        <h1>Synthwave Pomodoro</h1>
+        
+        <div class="timer-display">
+            <div class="glitch" data-text="25:00">25:00</div>
+        </div>
+        
+        <div class="change-indicator focus">Focus Time</div>
+        
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Timer variables
+        let timer;
+        let totalSeconds = 25 * 60; // 25 minutes
+        let isRunning = false;
+        let isFocusTime = true;
+
+        // DOM elements
+        const timerDisplay = document.querySelector('.glitch');
+        const changeIndicator = document.querySelector('.change-indicator');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Format time as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        // Update timer display
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(totalSeconds);
+            timerDisplay.setAttribute('data-text', formatTime(totalSeconds));
+        }
+
+        // Start the timer
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timer = setInterval(() => {
+                    if (totalSeconds > 0) {
+                        totalSeconds--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timer);
+                        isRunning = false;
+                        
+                        // Play sound
+                        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+                        audio.play();
+                        
+                        // Switch between focus and break
+                        if (isFocusTime) {
+                            isFocusTime = false;
+                            totalSeconds = 5 * 60; // 5 minute break
+                            changeIndicator.textContent = 'BREAK TIME';
+                            changeIndicator.className = 'change-indicator break';
+                        } else {
+                            isFocusTime = true;
+                            totalSeconds = 25 * 60; // 25 minute focus
+                            changeIndicator.textContent = 'FOCUS TIME';
+                            changeIndicator.className = 'change-indicator focus';
+                        }
+                        
+                        updateDisplay();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Pause the timer
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+            }
+        }
+
+        // Reset the timer
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            isFocusTime = true;
+            totalSeconds = 25 * 60;
+            changeIndicator.textContent = 'FOCUS TIME';
+            changeIndicator.className = 'change-indicator focus';
+            updateDisplay();
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
